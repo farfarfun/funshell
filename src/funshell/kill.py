@@ -158,13 +158,13 @@ class ProcessFinder:
             pid_list = [p.pid for p in self.procs]
         outcomes: list[tuple[int, bool]] = []
         for pid in pid_list:
-            r = _run(["kill", f"-{sig}", str(pid)])
+            r = _run(["kill", f"-9", str(pid)])
             ok = r.returncode == 0
             outcomes.append((pid, ok))
             if ok:
-                logger.success(f"kill -{sig} {pid}")
+                logger.success(f"kill -9 {pid}")
             else:
-                logger.warning(f"kill -{sig} {pid} failed")
+                logger.warning(f"kill -9 {pid} failed")
         return outcomes
 
     def __len__(self) -> int:
@@ -178,7 +178,7 @@ def kill_process(
     port: int | None = None,
     name: str | tuple[str, ...] | None = None,
     *,
-    sig: str = "TERM",
+    sig: str = "9",
 ) -> list[tuple[int, bool]]:
     """按进程名和/或端口号杀进程。不传则不执行对应项；都未传则返回 []。"""
     finder = ProcessFinder()
