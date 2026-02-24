@@ -1,6 +1,6 @@
 [project]
 name = "funshell"
-version = "1.0.14"
+version = "1.0.15"
 description = "A lightweight Python utility for executing shell commands with real-time or captured output."
 readme = "README.md"
 license = "MIT"
