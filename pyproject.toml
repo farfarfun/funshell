@@ -1,10 +1,12 @@
 [project]
 name = "funshell"
-version = "1.0.2"
-description = "funshell"
+version = "1.0.5"
+description = "A lightweight Python utility for executing shell commands with real-time or captured output."
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.6"
 dependencies = []
+keywords = [ "shell", "subprocess", "command", "execute",]
 [[project.authors]]
 name = "牛哥"
 email = "niuliangtao@qq.com"
@@ -28,3 +30,6 @@ Releases = "https://github.com/farfarfun/funshell/releases"
 
 [tool.setuptools]
 license-files = []
+
+[tool.setuptools.packages.find]
+where = [ "src",]
