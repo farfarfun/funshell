@@ -1,0 +1,30 @@
+[project]
+name = "funshell"
+version = "1.0.2"
+description = "funshell"
+readme = "README.md"
+requires-python = ">=3.6"
+dependencies = []
+[[project.authors]]
+name = "牛哥"
+email = "niuliangtao@qq.com"
+
+[[project.authors]]
+name = "farfarfun"
+email = "farfarfun@qq.com"
+
+[[project.maintainers]]
+name = "牛哥"
+email = "niuliangtao@qq.com"
+
+[[project.maintainers]]
+name = "farfarfun"
+email = "farfarfun@qq.com"
+
+[project.urls]
+Organization = "https://github.com/farfarfun"
+Repository = "https://github.com/farfarfun/funshell"
+Releases = "https://github.com/farfarfun/funshell/releases"
+
+[tool.setuptools]
+license-files = []
