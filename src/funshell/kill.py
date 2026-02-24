@@ -84,11 +84,29 @@ class ProcessFinder:
         return self
 
     def find_by_port(self, port: int) -> "ProcessFinder":
-        """按监听端口查找进程（macOS/Linux 用 lsof）。返回 self 便于链式调用。"""
-        out = _run(["lsof", "-i", f":{port}", "-P", "-n"]).stdout
+        """按监听端口查找进程（先尝试 lsof，再 fallback 到 ss）。返回 self 便于链式调用。"""
         self.procs = []
         seen: set[int] = set()
-        for line in out.strip().split("\n")[1:]:
+
+        self._find_by_port_lsof(port, seen)
+        if not self.procs:
+            self._find_by_port_ss(port, seen)
+
+        if self.procs:
+            logger.success(f"find_by_port port={port} -> {len(self.procs)} process(es)")
+        else:
+            logger.warning(
+                f"find_by_port port={port} -> no process found. "
+                "If the port is in use, the process may belong to another user (try sudo) "
+                "or run inside a container."
+            )
+        return self
+
+    def _find_by_port_lsof(self, port: int, seen: set[int]) -> None:
+        r = _run(["lsof", "-i", f":{port}", "-P", "-n"])
+        if r.returncode != 0 or not r.stdout.strip():
+            return
+        for line in r.stdout.strip().split("\n")[1:]:
             parts = line.split()
             if len(parts) < 2:
                 continue
@@ -101,9 +119,28 @@ class ProcessFinder:
             seen.add(pid)
             cmd = " ".join(parts[8:]) if len(parts) > 8 else parts[1]
             self.procs.append(ProcInfo(pid=pid, name=parts[0], cmd=cmd, port=port))
-        if self.procs:
-            logger.success(f"find_by_port port={port} -> {len(self.procs)} process(es)")
-        return self
+
+    def _find_by_port_ss(self, port: int, seen: set[int]) -> None:
+        """Fallback: use ss -tlnp to find listening PIDs on the port."""
+        r = _run(["ss", "-tlnp", f"sport = :{port}"])
+        if r.returncode != 0 or not r.stdout.strip():
+            return
+        pid_re = re.compile(r"pid=(\d+)")
+        for line in r.stdout.strip().split("\n")[1:]:
+            for m in pid_re.finditer(line):
+                pid = int(m.group(1))
+                if pid in seen:
+                    continue
+                seen.add(pid)
+                name = self._get_proc_name(pid)
+                self.procs.append(
+                    ProcInfo(pid=pid, name=name, cmd=line.strip(), port=port)
+                )
+
+    @staticmethod
+    def _get_proc_name(pid: int) -> str:
+        r = _run(["ps", "-p", str(pid), "-o", "comm="])
+        return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else str(pid)
 
     def kill(
         self,
