@@ -20,6 +20,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from nltlog import getLogger
+from .run import run_shell
 
 logger = getLogger("funshell")
 
@@ -158,7 +159,7 @@ class ProcessFinder:
             pid_list = [p.pid for p in self.procs]
         outcomes: list[tuple[int, bool]] = []
         for pid in pid_list:
-            r = _run(["kill", f"-9", str(pid)])
+            r = run_shell(f"kill -9 {pid}")
             ok = r.returncode == 0
             outcomes.append((pid, ok))
             if ok:
