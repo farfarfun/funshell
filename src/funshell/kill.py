@@ -193,6 +193,7 @@ def kill_process(
     if not pids:
         logger.info("kill_process: no processes matched (port=%s, name=%s)", port, name)
         return []
+    logger.info(f"kill_process: " + ",".join(list(pids)))
     outcomes = finder.kill(pids=list(pids), sig=sig)
     ok_count = sum(1 for _, ok in outcomes if ok)
     logger.success(
