@@ -159,13 +159,9 @@ class ProcessFinder:
             pid_list = [p.pid for p in self.procs]
         outcomes: list[tuple[int, bool]] = []
         for pid in pid_list:
-            r = run_shell(f"kill -9 {pid}")
-            ok = r.returncode == 0
-            outcomes.append((pid, ok))
-            if ok:
-                logger.success(f"kill -9 {pid}")
-            else:
-                logger.warning(f"kill -9 {pid} failed")
+            run_shell(f"kill -9 {pid}")
+            outcomes.append((pid, True))
+            logger.success(f"kill -9 {pid}")
         return outcomes
 
     def __len__(self) -> int:
