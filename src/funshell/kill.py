@@ -110,7 +110,7 @@ class ProcessFinder:
         *,
         procs: list[ProcInfo] | None = None,
         pids: list[int] | None = None,
-        sig: str = "TERM",
+        sig: str = "9",
     ) -> list[tuple[int, bool]]:
         """终止进程。不传 procs/pids 时使用本次查找结果 self.procs。返回 (pid, success) 列表。"""
         if pids is not None:
