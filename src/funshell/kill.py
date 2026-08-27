@@ -19,7 +19,7 @@
 import re
 import subprocess
 from dataclasses import dataclass
-from nltlog import getLogger
+from farlog import getLogger
 from .run import run_shell
 
 logger = getLogger("funshell")

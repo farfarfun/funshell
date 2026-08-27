@@ -1,11 +1,11 @@
 [project]
 name = "funshell"
-version = "1.0.19"
+version = "1.0.20"
 description = "A lightweight Python utility for executing shell commands with real-time or captured output."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.6"
-dependencies = [ "nltlog",]
+dependencies = [ "farlog>=1.1.7",]
 keywords = [ "shell", "subprocess", "command", "execute",]
 [[project.authors]]
 name = "牛哥"

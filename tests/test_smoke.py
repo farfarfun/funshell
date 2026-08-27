@@ -13,12 +13,9 @@ Notes:
   suite doesn't depend on the host's process table, and the termination path
   (`run_shell("kill -9 <pid>")`) is mocked so the suite never actually kills
   a real process.
-- `funshell.kill` imports `nltlog.getLogger` at module import time (a
-  leftover pre-migration dependency the org has otherwise renamed to
-  `farlog` elsewhere -- see farfarfun/todo-list NAMING.md). `nltlog` is
-  still published on PyPI, so it was added to `pyproject.toml`
-  `dependencies` as a minimal fix to make `import funshell` work at all;
-  the rename itself is out of scope for this smoke-test task.
+- `funshell.kill` used to import `nltlog.getLogger` at module import time
+  (farfarfun/todo-list#247) -- migrated to `farlog.getLogger` to match the
+  rest of the org (see NAMING.md).
 """
 
 import subprocess
