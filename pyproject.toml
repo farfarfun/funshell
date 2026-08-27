@@ -1,6 +1,6 @@
 [project]
 name = "funshell"
-version = "1.0.20"
+version = "1.0.21"
 description = "A lightweight Python utility for executing shell commands with real-time or captured output."
 readme = "README.md"
 license = "MIT"
@@ -33,6 +33,10 @@ license-files = []
 
 [tool.setuptools.packages.find]
 where = [ "src",]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [ "pytest",]
