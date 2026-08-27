@@ -5,7 +5,7 @@ description = "A lightweight Python utility for executing shell commands with re
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.6"
-dependencies = []
+dependencies = [ "nltlog",]
 keywords = [ "shell", "subprocess", "command", "execute",]
 [[project.authors]]
 name = "牛哥"
@@ -33,3 +33,6 @@ license-files = []
 
 [tool.setuptools.packages.find]
 where = [ "src",]
+
+[dependency-groups]
+dev = [ "pytest",]
