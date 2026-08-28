@@ -13,9 +13,8 @@ Notes:
   suite doesn't depend on the host's process table, and the termination path
   (`run_shell("kill -9 <pid>")`) is mocked so the suite never actually kills
   a real process.
-- `funshell.kill` used to import `nltlog.getLogger` at module import time
-  (farfarfun/todo-list#247) -- migrated to `farlog.getLogger` to match the
-  rest of the org (see NAMING.md).
+- `funshell.kill` imports `farlog.getLogger` at module import time; the
+  import tests below confirm that succeeds cleanly.
 """
 
 import subprocess
