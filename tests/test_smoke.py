@@ -160,13 +160,16 @@ def test_kill_process_with_no_args_is_noop_and_touches_nothing():
 def test_kill_process_mocked_end_to_end():
     from funshell.kill import kill_process
 
-    fake_ps_output = "  PID COMMAND         COMMAND\n  789 myproc          myproc --run\n"
+    fake_ps_output = (
+        "  PID COMMAND         COMMAND\n  789 myproc          myproc --run\n"
+    )
     completed = subprocess.CompletedProcess(
         args=["ps"], returncode=0, stdout=fake_ps_output, stderr=""
     )
-    with patch("funshell.kill.subprocess.run", return_value=completed), patch(
-        "funshell.kill.run_shell"
-    ) as mock_run_shell:
+    with (
+        patch("funshell.kill.subprocess.run", return_value=completed),
+        patch("funshell.kill.run_shell") as mock_run_shell,
+    ):
         outcomes = kill_process(name=("myproc",))
 
     mock_run_shell.assert_called_once_with("kill -9 789")

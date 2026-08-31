@@ -1,12 +1,13 @@
 [project]
 name = "funshell"
-version = "1.0.21"
+version = "1.0.22"
 description = "A lightweight Python utility for executing shell commands with real-time or captured output."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 dependencies = [ "farlog>=1.1.7",]
 keywords = [ "shell", "subprocess", "command", "execute",]
+license-files = ["LICENSE"]
 [[project.authors]]
 name = "牛哥"
 email = "niuliangtao@qq.com"
@@ -14,7 +15,6 @@ email = "niuliangtao@qq.com"
 [[project.authors]]
 name = "farfarfun"
 email = "farfarfun@qq.com"
-
 [[project.maintainers]]
 name = "牛哥"
 email = "niuliangtao@qq.com"
@@ -22,14 +22,12 @@ email = "niuliangtao@qq.com"
 [[project.maintainers]]
 name = "farfarfun"
 email = "farfarfun@qq.com"
-
 [project.urls]
 Organization = "https://github.com/farfarfun"
 Repository = "https://github.com/farfarfun/funshell"
 Releases = "https://github.com/farfarfun/funshell/releases"
 
 [tool.setuptools]
-license-files = []
 
 [tool.setuptools.packages.find]
 where = [ "src",]
