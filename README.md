@@ -75,6 +75,46 @@ output = run_shell_list(["echo hello", "echo world"], printf=False)
 # output == "hello\nworld"
 ```
 
+## Port / Process Lookup & Kill
+
+Query which process is holding a port (or match by process name), and optionally kill it — via CLI or Python API.
+
+### CLI
+
+```bash
+# Query which process is listening on port 8080
+funshell port 8080
+
+# Query and kill it
+funshell port 8080 --kill
+
+# Match by process name (any of the given keywords)
+funshell name node code-server
+
+# Match by name and kill with a specific signal
+funshell name node --kill --sig TERM
+```
+
+### Python API
+
+```python
+from funshell import kill_process
+from funshell.kill import ProcessFinder
+
+# One-shot: kill whatever matches port and/or name
+kill_process(port=8080)
+kill_process(name=("code-server",))
+kill_process(port=3000, name=("node",), sig="TERM")
+
+# Or inspect before killing
+finder = ProcessFinder().find_by_port(8080)
+for proc in finder:
+    print(proc)  # pid=42 name=python port=8080 | python3 -m myserver
+finder.kill(sig="TERM")
+```
+
+`find_by_port` tries `lsof` first, falling back to `ss` if unavailable. If no process is found, the port may be held by another user (try `sudo`) or a process inside a container.
+
 ## License
 
 [MIT](LICENSE)
