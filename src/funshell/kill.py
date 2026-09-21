@@ -122,7 +122,7 @@ class ProcessFinder:
             self.procs.append(ProcInfo(pid=pid, name=parts[0], cmd=cmd, port=port))
 
     def _find_by_port_ss(self, port: int, seen: set[int]) -> None:
-        """Fallback: use ss -tlnp to find listening PIDs on the port."""
+        """在 lsof 不可用时使用 ss 查找端口监听进程。"""
         r = _run(["ss", "-tlnp", f"sport = :{port}"])
         if r.returncode != 0 or not r.stdout.strip():
             return
@@ -159,9 +159,13 @@ class ProcessFinder:
             pid_list = [p.pid for p in self.procs]
         outcomes: list[tuple[int, bool]] = []
         for pid in pid_list:
-            run_shell(f"kill -{sig} {pid}")
-            outcomes.append((pid, True))
-            logger.success(f"kill -{sig} {pid}")
+            result = run_shell(f"kill -{sig} {pid}")
+            success = result == "0"
+            outcomes.append((pid, success))
+            if success:
+                logger.success(f"kill -{sig} {pid}")
+            else:
+                logger.error(f"kill -{sig} {pid} 失败: {result}")
         return outcomes
 
     def __len__(self) -> int:

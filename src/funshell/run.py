@@ -1,13 +1,12 @@
 import subprocess
-from typing import List, Optional
 
 
 def run_shell(
     command: str,
     printf: bool = True,
     *,
-    cwd: Optional[str] = None,
-    timeout: Optional[float] = None,
+    cwd: str | None = None,
+    timeout: float | None = None,
     encoding: str = "utf-8",
 ) -> str:
     """执行 shell 命令。
@@ -54,11 +53,11 @@ def run_shell(
 
 
 def run_shell_list(
-    command_list: List[str],
+    command_list: list[str],
     printf: bool = True,
     *,
-    cwd: Optional[str] = None,
-    timeout: Optional[float] = None,
+    cwd: str | None = None,
+    timeout: float | None = None,
     encoding: str = "utf-8",
 ) -> str:
     """批量执行 shell 命令，命令之间用 && 连接（前一条失败则终止）。

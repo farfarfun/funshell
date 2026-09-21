@@ -11,7 +11,7 @@ pip install funshell
 ## Quick Start
 
 ```python
-from run import run_shell, run_shell_list
+from funshell import run_shell, run_shell_list
 
 # Real-time output to terminal, returns exit code
 exit_code = run_shell("echo hello world")
@@ -54,7 +54,7 @@ Execute multiple commands sequentially (joined with `&&`, stops on first failure
 ## Examples
 
 ```python
-from run import run_shell, run_shell_list
+from funshell import run_shell, run_shell_list
 
 # Capture command output
 result = run_shell("ls -la", printf=False)
@@ -118,3 +118,16 @@ finder.kill(sig="TERM")
 ## License
 
 [MIT](LICENSE)
+
+---
+
+## 关于 farfarfun
+
+[farfarfun](https://github.com/farfarfun) 是一个专注于实用工具库的开源组织，
+涵盖云存储、数据处理、AI、多媒体与开发工具链等方向。
+
+- 🏠 组织主页：<https://github.com/farfarfun>
+- 📦 PyPI：<https://pypi.org/user/niuliangtao/>
+- 📧 联系：farfarfun@qq.com
+
+本项目基于 [MIT](LICENSE) 协议开源。

@@ -1,20 +1,6 @@
-"""Lightweight smoke tests for funshell.
+"""funshell 公共 API 的轻量测试。
 
-Scope: verify the public surface (`funshell.run_shell`, `funshell.run_shell_list`,
-`funshell.kill_process`, `funshell.kill.ProcessFinder`) imports and behaves
-sensibly, without running destructive commands.
-
-Notes:
-- `run_shell`/`run_shell_list` are exercised with harmless, deterministic
-  commands (`echo`, `exit N`) since that's exactly the feature under test
-  (executing shell commands).
-- `ProcessFinder`/`kill_process` wrap process discovery (`ps`/`lsof`/`ss`) and
-  process termination (`kill -9`). The discovery calls are mocked so the
-  suite doesn't depend on the host's process table, and the termination path
-  (`run_shell("kill -9 <pid>")`) is mocked so the suite never actually kills
-  a real process.
-- `funshell.kill` imports `farlog.getLogger` at module import time; the
-  import tests below confirm that succeeds cleanly.
+测试使用无害命令，并 mock 进程发现与终止操作，避免依赖主机进程表或真的终止进程。
 """
 
 import subprocess
@@ -144,6 +130,7 @@ def test_process_finder_kill_never_runs_real_kill_command():
 
     finder = ProcessFinder()
     with patch("funshell.kill.run_shell") as mock_run_shell:
+        mock_run_shell.return_value = "0"
         outcomes = finder.kill(pids=[999999])
 
     mock_run_shell.assert_called_once_with("kill -9 999999")
@@ -153,7 +140,7 @@ def test_process_finder_kill_never_runs_real_kill_command():
 def test_kill_process_with_no_args_is_noop_and_touches_nothing():
     from funshell.kill import kill_process
 
-    # Neither port nor name given -> returns [] before any subprocess call.
+    # 不传端口和进程名时不应执行任何子进程调用。
     assert kill_process() == []
 
 
@@ -170,7 +157,19 @@ def test_kill_process_mocked_end_to_end():
         patch("funshell.kill.subprocess.run", return_value=completed),
         patch("funshell.kill.run_shell") as mock_run_shell,
     ):
+        mock_run_shell.return_value = "0"
         outcomes = kill_process(name=("myproc",))
 
     mock_run_shell.assert_called_once_with("kill -9 789")
     assert outcomes == [(789, True)]
+
+
+def test_process_finder_kill_reports_failure_and_signal():
+    """底层 kill 失败时返回 False，并保留指定信号。"""
+    from funshell.kill import ProcessFinder
+
+    with patch("funshell.kill.run_shell", return_value="run shell error: denied") as run:
+        outcomes = ProcessFinder().kill(pids=[123], sig="TERM")
+
+    run.assert_called_once_with("kill -TERM 123")
+    assert outcomes == [(123, False)]
