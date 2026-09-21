@@ -10,8 +10,6 @@ funshell 命令行入口：查询端口/进程名占用情况，可选直接杀�
     funshell name node --kill --sig TERM
 """
 
-from typing import List
-
 import typer
 
 from .kill import ProcessFinder
@@ -42,7 +40,7 @@ def port(
 
 @app.command()
 def name(
-    pattern: List[str] = typer.Argument(..., help="进程名关键字，可传多个"),
+    pattern: list[str] = typer.Argument(..., help="进程名关键字，可传多个"),
     kill: bool = typer.Option(False, "--kill", help="查询后直接杀掉"),
     sig: str = typer.Option("9", "--sig", help="kill 信号，默认 9 (KILL)"),
 ) -> None:
