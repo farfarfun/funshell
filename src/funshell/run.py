@@ -33,7 +33,7 @@ def run_shell(
             return str(result.returncode)
         except subprocess.TimeoutExpired:
             return "run shell error: command timed out"
-        except Exception as e:
+        except (OSError, UnicodeError) as e:
             return f"run shell error: {e}"
     else:
         try:
@@ -48,7 +48,7 @@ def run_shell(
             return result.stdout.strip()
         except subprocess.TimeoutExpired:
             return "run shell error: command timed out"
-        except Exception as e:
+        except (OSError, UnicodeError) as e:
             return f"run shell error: {e}"
 
 

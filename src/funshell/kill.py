@@ -17,22 +17,25 @@
 """
 
 import re
+import signal
 import subprocess
+from collections.abc import Iterator
 from dataclasses import dataclass
 from farlog import getLogger
-from .run import run_shell
 
 logger = getLogger("funshell")
 
 
 @dataclass
 class ProcInfo:
+    """进程的标识、命令和可选监听端口信息。"""
+
     pid: int
     name: str
     cmd: str
     port: int | None = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         port_str = f" port={self.port}" if self.port is not None else ""
         return f"pid={self.pid} name={self.name}{port_str} | {self.cmd[:80]}"
 
@@ -44,6 +47,18 @@ def _run(cmd: list[str], text: bool = True) -> subprocess.CompletedProcess:
         text=text,
         timeout=10,
     )
+
+
+def _normalize_signal(sig: str) -> str:
+    value = sig.strip().upper()
+    if value.startswith("SIG"):
+        value = value[3:]
+    try:
+        number = int(value) if value.isdecimal() else signal.Signals[f"SIG{value}"].value
+        signal.Signals(number)
+    except (KeyError, ValueError) as exc:
+        raise ValueError(f"invalid signal: {sig}") from exc
+    return str(number)
 
 
 class ProcessFinder:
@@ -157,21 +172,23 @@ class ProcessFinder:
             pid_list = [p.pid for p in procs]
         else:
             pid_list = [p.pid for p in self.procs]
+        signal_number = _normalize_signal(sig)
         outcomes: list[tuple[int, bool]] = []
         for pid in pid_list:
-            result = run_shell(f"kill -{sig} {pid}")
-            success = result == "0"
+            result = _run(["kill", f"-{signal_number}", str(pid)])
+            success = result.returncode == 0
             outcomes.append((pid, success))
             if success:
                 logger.success(f"kill -{sig} {pid}")
             else:
-                logger.error(f"kill -{sig} {pid} 失败: {result}")
+                reason = result.stderr.strip() or f"exit code {result.returncode}"
+                logger.error(f"kill -{sig} {pid} 失败: {reason}")
         return outcomes
 
     def __len__(self) -> int:
         return len(self.procs)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[ProcInfo]:
         return iter(self.procs)
 
 

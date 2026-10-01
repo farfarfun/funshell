@@ -25,6 +25,20 @@ def _print_procs(finder: ProcessFinder) -> None:
         typer.echo(str(proc))
 
 
+def _kill_or_exit(finder: ProcessFinder, sig: str) -> None:
+    try:
+        outcomes = finder.kill(sig=sig)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc), param_hint="--sig") from exc
+    failed_pids = [str(pid) for pid, success in outcomes if not success]
+    if failed_pids:
+        typer.echo(
+            f"failed to kill PID(s) {', '.join(failed_pids)}: kill command failed",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+
 @app.command()
 def port(
     port: int = typer.Argument(..., help="端口号"),
@@ -35,7 +49,7 @@ def port(
     finder = ProcessFinder().find_by_port(port)
     _print_procs(finder)
     if kill and finder:
-        finder.kill(sig=sig)
+        _kill_or_exit(finder, sig)
 
 
 @app.command()
@@ -48,7 +62,7 @@ def name(
     finder = ProcessFinder().find_by_name(tuple(pattern))
     _print_procs(finder)
     if kill and finder:
-        finder.kill(sig=sig)
+        _kill_or_exit(finder, sig)
 
 
 def main() -> None:

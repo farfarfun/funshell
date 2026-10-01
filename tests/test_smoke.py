@@ -129,11 +129,13 @@ def test_process_finder_kill_never_runs_real_kill_command():
     from funshell.kill import ProcessFinder
 
     finder = ProcessFinder()
-    with patch("funshell.kill.run_shell") as mock_run_shell:
-        mock_run_shell.return_value = "0"
+    with patch("funshell.kill._run") as mock_run:
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=["kill"], returncode=0, stdout="", stderr=""
+        )
         outcomes = finder.kill(pids=[999999])
 
-    mock_run_shell.assert_called_once_with("kill -9 999999")
+    mock_run.assert_called_once_with(["kill", "-9", "999999"])
     assert outcomes == [(999999, True)]
 
 
@@ -154,13 +156,11 @@ def test_kill_process_mocked_end_to_end():
         args=["ps"], returncode=0, stdout=fake_ps_output, stderr=""
     )
     with (
-        patch("funshell.kill.subprocess.run", return_value=completed),
-        patch("funshell.kill.run_shell") as mock_run_shell,
+        patch("funshell.kill.subprocess.run", return_value=completed) as mock_run,
     ):
-        mock_run_shell.return_value = "0"
         outcomes = kill_process(name=("myproc",))
 
-    mock_run_shell.assert_called_once_with("kill -9 789")
+    assert mock_run.call_args_list[-1].args[0] == ["kill", "-9", "789"]
     assert outcomes == [(789, True)]
 
 
@@ -168,8 +168,11 @@ def test_process_finder_kill_reports_failure_and_signal():
     """底层 kill 失败时返回 False，并保留指定信号。"""
     from funshell.kill import ProcessFinder
 
-    with patch("funshell.kill.run_shell", return_value="run shell error: denied") as run:
+    failed = subprocess.CompletedProcess(
+        args=["kill"], returncode=1, stdout="", stderr="denied"
+    )
+    with patch("funshell.kill._run", return_value=failed) as run:
         outcomes = ProcessFinder().kill(pids=[123], sig="TERM")
 
-    run.assert_called_once_with("kill -TERM 123")
+    run.assert_called_once_with(["kill", "-15", "123"])
     assert outcomes == [(123, False)]
