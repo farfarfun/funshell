@@ -209,7 +209,7 @@ def kill_process(
         finder.find_by_name(pats)
         pids.update(p.pid for p in finder.procs)
     if not pids:
-        logger.info("kill_process: no processes matched (port=%s, name=%s)", port, name)
+        logger.info("kill_process: no processes matched (port={}, name={})", port, name)
         return []
     logger.info(f"kill_process: " + ",".join([str(i) for i in list(pids)]))
     outcomes = finder.kill(pids=list(pids), sig=sig)
