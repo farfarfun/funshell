@@ -66,6 +66,7 @@ def name(
 
 
 def main() -> None:
+    """CLI 入口：启动 Typer 应用，分发 `port`/`name` 子命令。"""
     app()
 
 

@@ -5,7 +5,8 @@
 
 示例:
 
-    from scripts.find_port import ProcessFinder, kill_process
+    from funshell.kill import ProcessFinder
+    from funshell import kill_process
 
     tool = ProcessFinder()
     tool.find_by_name(("code-server", "jupyter"))
