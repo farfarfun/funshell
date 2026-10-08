@@ -6,6 +6,8 @@
 import subprocess
 from unittest.mock import patch
 
+import pytest
+
 
 def test_import_top_level():
     import funshell
@@ -123,6 +125,35 @@ def test_process_finder_find_by_port_mocked_lsof():
     assert len(finder) == 1
     assert finder.procs[0].pid == 42
     assert finder.procs[0].port == 8080
+
+
+def test_process_finder_find_by_port_falls_back_when_lsof_is_missing():
+    from funshell.kill import ProcessFinder
+
+    ss_output = (
+        "State  Recv-Q Send-Q Local Address:Port Peer Address:Port Process\n"
+        'LISTEN 0      128    *:8080            *:*             users:(("python",pid=42,fd=3))\n'
+    )
+    completed = subprocess.CompletedProcess(
+        args=["ss"], returncode=0, stdout=ss_output, stderr=""
+    )
+    with (
+        patch(
+            "funshell.kill.subprocess.run", side_effect=[FileNotFoundError(), completed]
+        ),
+        patch.object(ProcessFinder, "_get_proc_name", return_value="python"),
+    ):
+        finder = ProcessFinder().find_by_port(8080)
+
+    assert [proc.pid for proc in finder] == [42]
+
+
+def test_process_finder_find_by_port_reports_when_lsof_and_ss_are_missing():
+    from funshell.kill import PortQueryCommandNotFoundError, ProcessFinder
+
+    with patch("funshell.kill.subprocess.run", side_effect=FileNotFoundError):
+        with pytest.raises(PortQueryCommandNotFoundError, match="lsof.*ss"):
+            ProcessFinder().find_by_port(8080)
 
 
 def test_process_finder_kill_never_runs_real_kill_command():
