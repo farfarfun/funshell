@@ -16,6 +16,7 @@
 
 ### 变更
 
+- 不再跟踪并忽略 `uv.lock`；该文件仅反映 1.0.23 发布时的历史状态。
 - README 改为中文，补充 Python ">=3.10" 版本要求与 `lsof`/`ss` 系统依赖说明；
   `pyproject.toml` 与 GitHub 仓库 description 同步补充端口/进程查询与终止能力说明；
   新增 `find_by_name` 按完整命令行匹配、可能匹配到自身进程的使用提示。

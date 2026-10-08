@@ -18,6 +18,15 @@ uv add funshell
 pip install funshell
 ```
 
+## 开发
+
+```bash
+uv sync --group dev
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+```
+
 ## 快速开始
 
 ```python
@@ -124,8 +133,9 @@ for proc in finder:
 finder.kill(sig="TERM")
 ```
 
-`find_by_port` 优先尝试 `lsof`，不可用时回退到 `ss`。若未查到进程，端口可能被其他
-用户持有的进程占用（可尝试 `sudo`），或该进程运行在容器内部。
+`find_by_port` 优先尝试 `lsof`，不可用时回退到 `ss`。若两个命令都不可用，会提示安装
+`lsof` 或 `iproute2`。若未查到进程，端口可能被其他用户持有的进程占用（可尝试 `sudo`），
+或该进程运行在容器内部。
 
 **注意**：`find_by_name` 按完整命令行（含参数）做子串匹配，匹配范围包含正在执行
 `funshell` 本身的进程（例如用 shell 调用 `funshell name foo --kill` 时，命令行里的

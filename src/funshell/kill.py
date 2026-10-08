@@ -50,6 +50,10 @@ def _run(cmd: list[str], text: bool = True) -> subprocess.CompletedProcess:
     )
 
 
+class PortQueryCommandNotFoundError(RuntimeError):
+    """端口查询所需的系统命令不可用。"""
+
+
 def _normalize_signal(sig: str) -> str:
     value = sig.strip().upper()
     if value.startswith("SIG"):
@@ -105,9 +109,9 @@ class ProcessFinder:
         self.procs = []
         seen: set[int] = set()
 
-        self._find_by_port_lsof(port, seen)
+        lsof_available = self._find_by_port_lsof(port, seen)
         if not self.procs:
-            self._find_by_port_ss(port, seen)
+            self._find_by_port_ss(port, seen, lsof_available)
 
         if self.procs:
             logger.success(f"find_by_port port={port} -> {len(self.procs)} process(es)")
@@ -119,10 +123,14 @@ class ProcessFinder:
             )
         return self
 
-    def _find_by_port_lsof(self, port: int, seen: set[int]) -> None:
-        r = _run(["lsof", "-i", f":{port}", "-P", "-n"])
+    def _find_by_port_lsof(self, port: int, seen: set[int]) -> bool:
+        try:
+            r = _run(["lsof", "-i", f":{port}", "-P", "-n"])
+        except FileNotFoundError:
+            logger.warning("lsof command not found; falling back to ss")
+            return False
         if r.returncode != 0 or not r.stdout.strip():
-            return
+            return True
         for line in r.stdout.strip().split("\n")[1:]:
             parts = line.split()
             if len(parts) < 2:
@@ -136,10 +144,21 @@ class ProcessFinder:
             seen.add(pid)
             cmd = " ".join(parts[8:]) if len(parts) > 8 else parts[1]
             self.procs.append(ProcInfo(pid=pid, name=parts[0], cmd=cmd, port=port))
+        return True
 
-    def _find_by_port_ss(self, port: int, seen: set[int]) -> None:
+    def _find_by_port_ss(
+        self, port: int, seen: set[int], lsof_available: bool
+    ) -> None:
         """在 lsof 不可用时使用 ss 查找端口监听进程。"""
-        r = _run(["ss", "-tlnp", f"sport = :{port}"])
+        try:
+            r = _run(["ss", "-tlnp", f"sport = :{port}"])
+        except FileNotFoundError as exc:
+            if not lsof_available:
+                raise PortQueryCommandNotFoundError(
+                    "port query requires `lsof` or `ss`; neither command is available. "
+                    "Install lsof or iproute2."
+                ) from exc
+            return
         if r.returncode != 0 or not r.stdout.strip():
             return
         pid_re = re.compile(r"pid=(\d+)")
